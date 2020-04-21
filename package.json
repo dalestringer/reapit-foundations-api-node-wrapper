@@ -1,0 +1,15 @@
+{
+  "name": "reapit-api-wrapper",
+  "version": "1.0.0",
+  "description": "A wrapper for the Reapit Foundations REST API.",
+  "main": "./dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Dale Stringer",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node-fetch": "^2.5.6",
+    "node-fetch": "^2.6.0"
+  }
+}
