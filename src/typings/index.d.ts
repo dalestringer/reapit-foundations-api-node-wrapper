@@ -35,7 +35,7 @@ declare namespace ReapitApi {
 				embed?: string[];
 			}
 		}
-		export interface LastRequest {
+		export interface LastHttpRequest {
 			url?: string;
 			fetchOptions?: RequestInit;
 		}
@@ -95,6 +95,48 @@ declare namespace ReapitApi {
 			interface IContacts extends ReapitApi.Data.ResponseObjects {
 				_embedded: IContact[];
 			}
+
+			interface CreateContactBase {
+				title?: string;
+				forename?: string;
+				surname: string;
+				dateOfBirth?: string;
+				active?: boolean;
+				marketingConsent: string;
+				source?: ReapitApi.Data.Contacts.Source;
+				officeIds: string[];
+				negotiatorIds: string[];
+				secondaryAddress?: ReapitApi.Data.Contacts.Address;
+				workAddress?: ReapitApi.Data.Contacts.Address;
+				metadata?: object;
+			}
+
+			interface CreateContactPrimaryAddress extends CreateContactBase {
+				primaryAddress: ReapitApi.Data.Contacts.Address;
+			}
+
+			interface CreateContactHomePhone extends CreateContactBase {
+				homePhone: string;
+			}
+
+			interface CreateContactWorkPhone extends CreateContactBase {
+				workPhone: string;
+			}
+
+			interface CreateContactMobilePhone extends CreateContactBase {
+				mobilePhone: string;
+			}
+
+			interface CreateContactEmail extends CreateContactBase {
+				email: string;
+			}
+
+			export type ContactCreation =
+				| CreateContactPrimaryAddress
+				| CreateContactHomePhone
+				| CreateContactWorkPhone
+				| CreateContactMobilePhone
+				| CreateContactEmail;
 		}
 	}
 }

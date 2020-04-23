@@ -11,11 +11,12 @@ This is a wrapper for the [Reapit Foundations Platform REST API](https://www.rea
 
 ## Features
 
-The library is still in development and so only currently allows you to call two endpoints, these are:
+The library is still in development and only currently allows you to call the following endpoints:
 
 -   Contact Endpoints
     -   GetContact
     -   GetContacts
+    -   PostContact
 
 More will be added in the future.
 
@@ -37,7 +38,7 @@ const reapitApi = new ReapitApi({
 });
 
 reapitApi
-	.getContacts()
+	.getContacts() // a filter parameter object can be added to refine your results
 	.then(data => console.log(data))
 	.catch(err => console.log(err));
 ```

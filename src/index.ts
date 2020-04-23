@@ -1,4 +1,5 @@
-import fetch, { RequestInit } from 'node-fetch';
+import fetch, { RequestInit, Response } from 'node-fetch';
+import _ from 'lodash';
 
 class ReapitApi {
 	/**
@@ -51,10 +52,16 @@ class ReapitApi {
 	protected _api_version: string = '2020-01-31';
 
 	/**
-	 * The last API request that was sent
-	 * @var {object} _last_request
+	 * The last HTTP request that was sent
+	 * @var {object} _last_http_request
 	 */
-	protected _last_request: object = null;
+	protected _last_http_request: object = null;
+
+	/**
+	 * The last HTTP response that was received
+	 * @var {object} _last_http_response
+	 */
+	protected _last_http_response: Response = null;
 
 	/**
 	 * Constructor
@@ -72,15 +79,33 @@ class ReapitApi {
 	 * Helper method to call an endpoint
 	 * @param {string} url
 	 * @param {object} options
+	 * @param {boolean} jsonResponse
 	 * @returns {promise}
 	 */
 	protected async _call(
 		url: string,
 		options: RequestInit = {},
+		jsonResponse: boolean = true,
 	): Promise<any> {
 		// Set the current API request, can be used for later debugging
-		this._setLastApiRequest(url, options);
+		this._setLastHttpRequest(url, options);
+
 		const response = await fetch(url, options);
+
+		// Set the current API response, can be used for later debugging
+		this._setLastHttpResponse(response);
+
+		// Check for successful request e.g 2XX
+		if (response.status < 200 && response.status > 299) {
+			throw new Error(
+				`HTTP request didn't return a successful HTTP status code. Response returned ${response.status}.`,
+			);
+		}
+
+		if (!jsonResponse) {
+			return response;
+		}
+
 		return response.json();
 	}
 
@@ -125,7 +150,7 @@ class ReapitApi {
 			return '';
 		}
 
-		parametersKeyArray.forEach((key, index) => {
+		parametersKeyArray.forEach(key => {
 			if (Array.isArray(params[key])) {
 				params[key].forEach(
 					(filter: string | number) =>
@@ -145,12 +170,14 @@ class ReapitApi {
 	 * @param {string} endpoint
 	 * @param {object} options
 	 * @param {object} params
+	 * @param {boolean} jsonResponse
 	 * @returns {promise}
 	 */
 	protected async _apiCall(
 		endpoint: string,
 		options: RequestInit = {},
 		params: object = {},
+		jsonResponse: boolean = true,
 	): Promise<any> {
 		const auth_response = await this._authenticate();
 
@@ -160,8 +187,7 @@ class ReapitApi {
 		}
 
 		const parameters = this._concatParameters(params);
-
-		const compiled_options = {
+		const default_options = {
 			method: 'GET',
 			headers: {
 				Accept: 'application/json',
@@ -169,31 +195,53 @@ class ReapitApi {
 				Authorization: `Bearer ${auth_response.access_token}`,
 				'reapit-customer': this._reapit_customer,
 			},
-			...options,
 		};
+
+		const compiled_options = _.merge(default_options, options);
 
 		return this._call(
 			`${this._api_url}${endpoint}${parameters}`,
 			compiled_options,
+			jsonResponse,
 		);
 	}
 
 	/**
-	 * Method to set the last API request
+	 * Method to set the last HTTP request
 	 * @param {string} url
 	 * @param {object} fetchOptions
 	 * @returns {void}
 	 */
-	protected _setLastApiRequest(url: string, fetchOptions: RequestInit): void {
-		this._last_request = { url, fetchOptions };
+	protected _setLastHttpRequest(
+		url: string,
+		fetchOptions: RequestInit,
+	): void {
+		this._last_http_request = { url, fetchOptions };
 	}
 
 	/**
-	 * Method to retrieve the last API request
+	 * Method to set the last HTTP response
+	 * @param {promise} response
+	 * @returns {void}
+	 */
+	protected _setLastHttpResponse(response: Response): void {
+		this._last_http_response = response;
+	}
+
+	/**
+	 * Method to retrieve the last HTTP request
 	 * @returns {object}
 	 */
-	public __getLastApiRequest(): ReapitApi.Calls.LastRequest {
-		return this._last_request;
+	public __getLastHttpRequest(): ReapitApi.Calls.LastHttpRequest {
+		return this._last_http_request;
+	}
+
+	/**
+	 * Method to retrieve the last HTTP response
+	 * @returns {promise}
+	 */
+	public __getLastHttpResponse(): Response {
+		return this._last_http_response;
 	}
 
 	/**
@@ -218,6 +266,27 @@ class ReapitApi {
 		params: ReapitApi.Calls.Contacts.GetContactParamOptions = {},
 	): Promise<ReapitApi.Data.Contacts.IContact> {
 		return this._apiCall(`/contacts/${id}`, {}, params);
+	}
+
+	/**
+	 * Method to create a new contact
+	 * @param {object} contact
+	 * @returns {promise}
+	 */
+	public async postContact(
+		contact: ReapitApi.Data.Contacts.ContactCreation,
+	): Promise<any> {
+		const options: RequestInit = {
+			method: 'POST',
+			headers: {
+				'content-type': 'application/json',
+			},
+			body: JSON.stringify(contact),
+		};
+
+		const response = await this._apiCall('/contacts', options, {}, false);
+
+		return response.headers.get('location');
 	}
 }
 
