@@ -96,7 +96,7 @@ class ReapitApi {
 		this._setLastHttpResponse(response);
 
 		// Check for successful request e.g 2XX
-		if (response.status < 200 && response.status > 299) {
+		if (response.status < 200 || response.status > 299) {
 			throw new Error(
 				`HTTP request didn't return a successful HTTP status code. Response returned ${response.status}.`,
 			);
