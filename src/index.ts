@@ -230,6 +230,25 @@ class ReapitApi {
 		return location.substr(location.lastIndexOf('/') + 1);
 	}
 
+	protected async _patchApiCall(
+		endpoint: string,
+		resource: object,
+		etag: string,
+	): Promise<boolean> {
+		const options: RequestInit = {
+			method: 'PATCH',
+			headers: {
+				'content-type': 'application/json',
+				'If-Match': etag,
+			},
+			body: JSON.stringify(resource),
+		};
+
+		await this._apiCall(endpoint, options, {}, false);
+
+		return true;
+	}
+
 	/**
 	 * Method to set the last HTTP request
 	 * @param {string} url
@@ -301,6 +320,25 @@ class ReapitApi {
 		contact: ReapitApi.Data.Contacts.ContactCreation,
 	): Promise<string> {
 		return this._postApiCall('/contacts', contact);
+	}
+
+	/**
+	 * Method to update a contact
+	 * @param {string} id
+	 * @param {object} contact
+	 * @param {string} etag
+	 * @returns {promise}
+	 */
+	public async patchContact(
+		id: string,
+		contact: ReapitApi.Data.Contacts.UpdateContact,
+		etag: string = null,
+	): Promise<boolean> {
+		if (etag === null) {
+			etag = (await this.getContact(id))._eTag;
+		}
+
+		return this._patchApiCall(`/contacts/${id}`, contact, etag);
 	}
 }
 

@@ -137,6 +137,26 @@ declare namespace ReapitApi {
 				| CreateContactWorkPhone
 				| CreateContactMobilePhone
 				| CreateContactEmail;
+
+			export interface UpdateContact {
+				title?: string;
+				forename?: string;
+				surname?: string;
+				dateOfBirth?: string;
+				active?: boolean;
+				marketingConsent?: string;
+				source?: ReapitApi.Data.Contacts.Source;
+				officeIds?: string[];
+				negotiatorIds?: string[];
+				secondaryAddress?: ReapitApi.Data.Contacts.Address;
+				workAddress?: ReapitApi.Data.Contacts.Address;
+				metadata?: object;
+				primaryAddress?: ReapitApi.Data.Contacts.Address;
+				homePhone?: string;
+				workPhone?: string;
+				mobilePhone?: string;
+				email?: string;
+			}
 		}
 	}
 }
