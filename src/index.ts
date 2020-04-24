@@ -207,6 +207,30 @@ class ReapitApi {
 	}
 
 	/**
+	 * Helper method for making POST API calls
+	 * @param {string} endpoint
+	 * @param {object} resource
+	 * @returns {promise}
+	 */
+	protected async _postApiCall(
+		endpoint: string,
+		resource: object,
+	): Promise<string> {
+		const options: RequestInit = {
+			method: 'POST',
+			headers: {
+				'content-type': 'application/json',
+			},
+			body: JSON.stringify(resource),
+		};
+
+		const response = await this._apiCall(endpoint, options, {}, false);
+		const location: string = response.headers.get('location');
+
+		return location.substr(location.lastIndexOf('/') + 1);
+	}
+
+	/**
 	 * Method to set the last HTTP request
 	 * @param {string} url
 	 * @param {object} fetchOptions
@@ -273,20 +297,10 @@ class ReapitApi {
 	 * @param {object} contact
 	 * @returns {promise}
 	 */
-	public async postContact(
+	public postContact(
 		contact: ReapitApi.Data.Contacts.ContactCreation,
 	): Promise<any> {
-		const options: RequestInit = {
-			method: 'POST',
-			headers: {
-				'content-type': 'application/json',
-			},
-			body: JSON.stringify(contact),
-		};
-
-		const response = await this._apiCall('/contacts', options, {}, false);
-
-		return response.headers.get('location');
+		return this._postApiCall('/contacts', contact);
 	}
 }
 
