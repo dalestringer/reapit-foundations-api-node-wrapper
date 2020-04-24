@@ -299,7 +299,7 @@ class ReapitApi {
 	 */
 	public postContact(
 		contact: ReapitApi.Data.Contacts.ContactCreation,
-	): Promise<any> {
+	): Promise<string> {
 		return this._postApiCall('/contacts', contact);
 	}
 }
