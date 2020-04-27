@@ -230,6 +230,13 @@ class ReapitApi {
 		return location.substr(location.lastIndexOf('/') + 1);
 	}
 
+	/**
+	 * Helper method for making PATCH API calls
+	 * @param {string} endpoint
+	 * @param {object} resource
+	 * @param {string} etag
+	 * @returns {promise}
+	 */
 	protected async _patchApiCall(
 		endpoint: string,
 		resource: object,
